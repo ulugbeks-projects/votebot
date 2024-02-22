@@ -20,6 +20,12 @@ Go to the project directory
 ```bash
   cd django-aiogram-tg-bot-template
 ```
+Create .env file and write this lines:
+```bash
+ADMINS=12345678,12345677,12345676
+BOT_TOKEN=123452345243:Asdfasdfasf
+ip=localhost
+```
 
 Install requirements
 
