@@ -17,10 +17,10 @@ def get_or_create_user(user_id, first_name: str, last_name: str|None, username:s
 
 
 @sync_to_async
-def add_channel(user_id, channel):
+def add_channel(user_id, channel, is_admin=False):
     try:
         user = BotUser.objects.get(user_id=user_id)
-        channel, created = BotUserChannel.objects.get_or_create(user=user, defaults={'channel': channel})
+        channel, created = BotUserChannel.objects.get_or_create(user=user, defaults={'channel': channel, 'is_admin': is_admin})
         return channel, created
     except BotUser.DoesNotExist:
         return None, False
