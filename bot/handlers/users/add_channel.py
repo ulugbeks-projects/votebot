@@ -43,6 +43,7 @@ async def get_channel_handler(message: types.Message, state: FSMContext):
     # check if channel is valid
     if not channel.startswith("@") and not channel.isdigit():
         await message.answer("Kanal username yoki id sini kiriting")
+        await state.set_state("channel")
         return
     
     # check if bot is admin in channel
