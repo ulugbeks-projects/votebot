@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BotUser
+from .models import BotUser, BotUserChannel 
 
 
 class BotUserAdmin(admin.ModelAdmin):
@@ -10,3 +10,12 @@ class BotUserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(BotUser, BotUserAdmin)
+
+
+class BotUserChannelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'channel', 'is_admin', 'created_at', 'updated_at')
+    search_fields = ('user', 'channel')
+    list_filter = ('created_at', 'updated_at')
+
+
+admin.site.register(BotUserChannel, BotUserChannelAdmin)
