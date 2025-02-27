@@ -47,8 +47,9 @@ class VotePost(models.Model):
     media_type = models.CharField(max_length=10, default='none')
     media_id = models.CharField(max_length=255, null=True, blank=True)
     caption = models.TextField()
-
+    message_id = models.CharField(max_length=255, null=True, blank=True)
     options = models.ForeignKey(VoteOption, on_delete=models.CASCADE)
+    status = models.CharField(max_length=15, default='draft')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

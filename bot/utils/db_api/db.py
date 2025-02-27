@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
-from botapp.models import BotUser, BotUserChannel
+from botapp.models import BotUser, BotUserChannel, VoteOptionItem, VoteOption, VotePost
+import logging
 
 
 @sync_to_async 
@@ -52,3 +53,46 @@ def delete_channel(user_id):
         return False
     except Exception as e:
         return False
+
+
+@sync_to_async
+def create_voteoption_group(options: list):
+    vote_option = VoteOption.objects.create()
+    for option in options:
+        vote_option_item = VoteOptionItem.objects.create(title=option)
+        vote_option.items.add(vote_option_item)
+    return vote_option.id, list(vote_option.items.all())
+
+
+@sync_to_async
+def create_vote_post(user_id, media_type, media_id, caption, message_id, options_group_id, status='draft'):
+    try:
+        user = BotUser.objects.get(user_id=user_id)
+        vote_option = VoteOption.objects.get(id=options_group_id)
+        vote_post = VotePost.objects.create(
+            user=user,
+            media_type=media_type,
+            media_id=media_id,
+            caption=caption,
+            message_id=message_id,
+            options=vote_option,
+            status=status
+        )
+        return vote_post
+    except Exception as e:
+        logging.error(e)
+        return None
+    
+
+@sync_to_async
+def get_unsend_voteposts(user_id):
+
+    try:
+        user = BotUser.objects.get(user_id=user_id)
+        vote_posts = VotePost.objects.filter(user=user, status='draft')
+        if vote_posts:
+            return list(vote_posts)
+        return None
+    except Exception as err:
+        logging.error(err)
+        return None
