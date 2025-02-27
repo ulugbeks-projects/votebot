@@ -89,10 +89,41 @@ def get_unsend_voteposts(user_id):
 
     try:
         user = BotUser.objects.get(user_id=user_id)
-        vote_posts = VotePost.objects.filter(user=user, status='draft')
+        vote_posts = VotePost.objects.filter(user=user, status='draft').order_by('-created_at')
         if vote_posts:
             return list(vote_posts)
         return None
     except Exception as err:
         logging.error(err)
         return None
+
+
+@sync_to_async
+def get_send_post_info(post_id):
+    try:
+        response = {}
+        post = VotePost.objects.get(id=post_id)
+        channel = BotUserChannel.objects.get(user=post.user)
+        response['channel'] = channel.channel
+        response['media_type'] = post.media_type
+        response['media_id'] = post.media_id
+        response['caption'] = post.caption
+        response['message_id'] = post.message_id
+        response['options'] = list(post.options.items.all())
+        return response
+    except Exception as err:
+        logging.error(err)
+        return None
+    
+
+@sync_to_async
+def change_votepost_status(post_id, status, message_id: str|None):
+    try:
+        post = VotePost.objects.get(id=post_id)
+        post.status = status
+        post.message_id = message_id
+        post.save()
+        return True
+    except Exception as e:
+        logging.error(e)
+        return False
