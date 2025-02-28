@@ -20,7 +20,8 @@ async def delete_channel_handler(call: types.CallbackQuery):
     is_deleted = await delete_channel(call.from_user.id)
 
     if is_deleted:
-        await call.message.answer("Kanal muvaffaqiyatli o'chirildi!")
+        await call.message.answer("Kanal muvaffaqiyatli o'chirildi!\n"
+                                  "Yangi qo'shish uchun /add_channel buyrug'ini bering")
         await call.message.delete_reply_markup()
     else:
         await call.message.answer("Kanal o'chirishda xatolik!")

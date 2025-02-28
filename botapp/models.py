@@ -34,6 +34,9 @@ class VoteOptionItem(models.Model):
     def __str__(self):
         return self.title
     
+    class Meta:
+        ordering = ['created_at']
+    
 
 class VoteOption(models.Model):
     items = models.ManyToManyField(VoteOptionItem)
