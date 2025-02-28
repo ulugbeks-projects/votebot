@@ -1,7 +1,8 @@
 from asgiref.sync import sync_to_async
-from botapp.models import BotUser, BotUserChannel, VoteOptionItem, VoteOption, VotePost
+from botapp.models import BotUser, BotUserChannel, VoteOptionItem, VoteOption, VotePost, Vote
 import logging
-
+from aiogram.types import ChatMemberStatus
+from bot.loader import bot
 
 @sync_to_async 
 def get_or_create_user(user_id, first_name: str, last_name: str|None, username:str|None):
@@ -127,3 +128,70 @@ def change_votepost_status(post_id, status, message_id: str|None):
     except Exception as e:
         logging.error(e)
         return False
+
+
+@sync_to_async
+def user_vote(bot_user, post_id, option_id, is_subscribed):
+    """
+    Allows a user to vote only if they are subscribed to the required channel.
+
+    Args:
+        bot_user (BotUser): The user object.
+        post_id (int): The ID of the vote post.
+        option_id (int): The ID of the option user is voting for.
+        is_subscribed (bool): Whether the user is verified as subscribed to the channel (from outside).
+
+    Returns:
+        dict: Response including status, message, options, and vote object if successful.
+    """
+    response = {}
+
+    if not is_subscribed:
+        response['message'] = 'Ovoz berish uchun avval kanalga obuna bo‘ling!'
+        response['status'] = False
+        return response
+
+    try:
+        post = VotePost.objects.get(id=post_id)
+        option = VoteOptionItem.objects.get(id=option_id)
+
+        # Check if the user has already voted on this post
+        if Vote.objects.filter(user=bot_user, post=post).exists():
+            response['message'] = 'Siz allaqachon ovoz bergansiz!'
+            response['status'] = False
+        else:
+            # Create a new vote record
+            vote = Vote.objects.create(
+                user=bot_user,
+                post=post,
+                option=option
+            )
+
+            response['message'] = 'Ovoz berildi'
+            response['status'] = True
+            response['options'] = list(post.options.items.all())
+            response['vote'] = vote
+
+        return response
+
+    except VotePost.DoesNotExist:
+        logging.error(f"VotePost with id {post_id} does not exist.")
+        response['message'] = 'Ovoz berish uchun post topilmadi.'
+        response['status'] = False
+        return response
+
+    except VoteOptionItem.DoesNotExist:
+        logging.error(f"VoteOptionItem with id {option_id} does not exist.")
+        response['message'] = 'Tanlangan variant topilmadi.'
+        response['status'] = False
+        return response
+
+    except Exception as err:
+        logging.error(f"Unexpected error in user_vote: {err}")
+        response['message'] = 'Noma’lum xatolik yuz berdi.'
+        response['status'] = False
+        return response
+
+
+    
+        

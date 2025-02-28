@@ -4,6 +4,7 @@ from aiogram.dispatcher.filters import Command
 from bot.loader import dp
 from bot.keyboards.inline import vote_options_kb
 from bot.utils.db_api.db import create_voteoption_group, create_vote_post
+from asgiref.sync import sync_to_async
 
 # Command handler to initiate vote creation
 @dp.message_handler(Command("create_vote"), state="*")
@@ -62,26 +63,29 @@ async def get_vote_options_handler(message: types.Message, state: FSMContext):
     option_group_id, option_items = await create_voteoption_group(options)
     await state.update_data(option_group_id=option_group_id, option_items=option_items)
     
-    if data.get("photo_id"):
-        sent_message = await message.answer_photo(
-            photo=data["photo_id"], caption=data["vote_text"], reply_markup=vote_options_kb(option_items)
-        )
-    else:
-        sent_message = await message.answer(data["vote_text"], reply_markup=vote_options_kb(option_items))
-    
-    await state.update_data(message_id=sent_message.message_id)
+    await state.update_data(message_id=message.message_id)
     vote_post = await create_vote_post(
         user_id=message.from_user.id,
         media_type="photo" if data.get("photo_id") else "none",
         media_id=data.get("photo_id"),
         caption=data["vote_text"],
-        message_id=sent_message.message_id,
+        message_id=message.message_id,
         options_group_id=option_group_id
     )
+    
+    post_id = await sync_to_async(lambda: vote_post.id)()
+
+    if data.get("photo_id"):
+        await message.answer_photo(
+            photo=data["photo_id"], caption=data["vote_text"], reply_markup=vote_options_kb(option_items, post_id)
+        )
+    else:
+        await message.answer(data["vote_text"], reply_markup=vote_options_kb(option_items, post_id))
+    
     if vote_post:
         await message.answer("So'rovnoma yaratildi✅\nKanalga yuborish uchun /send_vote buyrug'ini bosing")
     else:
         await message.answer("Xatolik yuz berdi! So'rovnoma yaratish bekor qilindi!")
-    
+
     await state.finish()
 

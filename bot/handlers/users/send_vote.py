@@ -17,10 +17,10 @@ async def send_vote(post_id):
         options = response.get('options')
         
         if media_type == 'photo':
-            message = await dp.bot.send_photo(channel, media_id, caption=caption, reply_markup=vote_options_kb(options))
+            message = await dp.bot.send_photo(channel, media_id, caption=caption, reply_markup=vote_options_kb(options, post_id))
         
         elif media_type == 'none':
-            message = await dp.bot.send_message(channel, caption, reply_markup=vote_options_kb(options))
+            message = await dp.bot.send_message(channel, caption, reply_markup=vote_options_kb(options, post_id))
         
         await change_votepost_status(post_id, 'published', message.message_id)
 

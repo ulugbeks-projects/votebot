@@ -1,3 +1,3 @@
 from .delete_channel import delete_channel_keyboard
-from .vote_options import vote_options_kb
+from .vote_options import vote_options_kb, vote_options_cb
 from .unsend_voteposts import get_unsend_voteposts_keyboard, unsend_voteposts_callback
