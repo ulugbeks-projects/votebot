@@ -10,6 +10,7 @@ certifi==2025.1.31
 Django==5.0.1
 environs==10.3.0
 frozenlist==1.5.0
+gunicorn==23.0.0
 idna==3.10
 marshmallow==3.26.1
 multidict==6.1.0
